@@ -1,21 +1,54 @@
-```
+/*
+
 ██████╗ ██████╗████████████████████████████╗      ██████╗██████╗ █████╗███╗   █████████████████╗
 ██╔══████╔═══████╔════╚══██╔══██╔════██╔══██╗    ██╔════╝██╔══████╔══██████╗  ██╚══██╔══██╔════╝
 ██████╔██║   █████████╗  ██║  █████╗ ██████╔╝    ██║  █████████╔█████████╔██╗ ██║  ██║  ███████╗
 ██╔═══╝██║   ██╚════██║  ██║  ██╔══╝ ██╔══██╗    ██║   ████╔══████╔══████║╚██╗██║  ██║  ╚════██║
 ██║    ╚██████╔███████║  ██║  █████████║  ██║    ╚██████╔██║  ████║  ████║ ╚████║  ██║  ███████║
 ╚═╝     ╚═════╝╚══════╝  ╚═╝  ╚══════╚═╝  ╚═╝     ╚═════╝╚═╝  ╚═╚═╝  ╚═╚═╝  ╚═══╝  ╚═╝  ╚══════╝
-                                                                                           
-```
+                                                                                                
+Made with ❤️ by Auryn.eth
+Forked and modified by boilerrat.eth
+*/
+// SPDX-License-Identifier: LGPL-3.0-only
 
-A ridiculously simple general purpose Grant Application Poster smart contract.
-It takes two strings (content and tag) as parameters and emits those strings, along with msg.sender, as an event. That's it.
+pragma solidity 0.8.19;
 
-It is intended to be deployed on L2 Ethereum networks, or any EVM compatible network where gas is cheap/free.
+contract PosterGrants {
+    // Define a Post struct to hold the user, content, and tag
+    struct Post {
+        address user;
+        string content;
+        string tag;
+    }
 
----
+    // Declare an array of Post structs to hold all posts
+    Post[] public posts;
 
-Original Poster contract `Made with ❤️ by Auryn.eth`
-Forked by boilerrat.eth
+    // Declare an event to notify external consumers
+    event NewPost(address indexed user, string content, string indexed tag);
 
-Original contract simlply posted a string onchain. The simplicity is beustiful however for to add justa slight bit more, but not much,to also add the ability to read from the contract, to make it easier for people to call back  posted strins for use in other applications.
+    // Function to post content and tag
+    function post(string calldata content, string calldata tag) public {
+        // Create a new Post
+        Post memory newPost = Post({
+            user: msg.sender,
+            content: content,
+            tag: tag
+        });
+
+        // Add the new Post to the posts array
+        posts.push(newPost);
+
+        // Emit the NewPost event
+        emit NewPost(msg.sender, content, tag);
+    }
+
+    // Function to read a post by its index
+    function readPost(uint256 index) public view returns(address, string memory, string memory) {
+        require(index < posts.length, "Index out of bounds");
+        Post memory postToRead = posts[index];
+        return (postToRead.user, postToRead.content, postToRead.tag);
+    }
+}
+
